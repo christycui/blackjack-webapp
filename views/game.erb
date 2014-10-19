@@ -1,0 +1,122 @@
+
+
+<!-- play again? -->
+<%if @turn == 'end'%>
+  <div class = 'pull-left'>
+    <h1 class='animated pulse'>End of Game!</h1>
+    <%if @player_win%>
+      <%session[:balance] = (session[:balance].to_f + session[:bet].to_f).to_s%>
+    <%else%>
+      <%session[:balance] = (session[:balance].to_f - session[:bet].to_f).to_s%>
+    <%end%>
+
+    <%if session[:balance].include?('.')%>
+      <%session[:balance] = session[:balance].split('.')[0] + '.' + session[:balance].split('.')[1].ljust(2,'0')%>
+    <%else%>
+      <%session[:balance] = session[:balance] + '.00'%>
+    <%end%>
+    <h5><%="Balance: $#{session[:balance]}"%></h5>
+
+    <h5>Would you like to play again?</h5>
+    <form action='/bet' class='choice1'>
+      <input type='submit' class='btn btn-success' value='Yes'>
+    </form>
+    <form action='/bye' class='choice2'>
+      <input type='submit' class='btn btn-warning' value='No'>
+    </form>
+  </div>
+<%end%>
+
+<h2><%="Blackjack in session." if @turn != 'end'%></h2>
+<!-- dealer component -->
+<div class='well' id='dealer'>
+  <!-- display dealer's cards -->
+<p><h5>Dealer's cards:</h5>
+  <%session[:dealer_card].each_index do |i|%>
+    <!-- set instance variable to set state for new dealt card -->
+    <%@dealer_deal_one = 'Y' if session[:dealer_card].length - 1 == i and @dealer_deal%>
+    <%if i == 0 and @turn != 'end'%>
+      <!-- first card hidden when game in session -->
+      <img src="/images/cards/cover.jpg" margin-right=15px/>
+    <%else%>
+      <!-- animate shuffle for other cards if first dealt -->
+      <%session[:deck].each do |card|%>
+        <img src="/images/cards/<%=card.split(' ')[-1].downcase%>_<%=card.split(' ')[0].downcase%>.jpg" class='animated bounceInDown bounceOutDown' id='shuffle1'> 
+      <%end if @deal or @dealer_deal_one %>
+      <!-- display other cards -->
+      <%if ['A','J','Q','K'].include?session[:dealer_card][i][0]%>
+        <img src="/images/cards/<%=session[:dealer_card][i].split(' ')[-1].downcase%>_<%=session[:dealer_card][i].split(' ')[0].downcase%>.jpg"/>
+      <%else%>
+        <img src="/images/cards/<%=session[:dealer_card][i].split(' ')[-1].downcase%>_<%=session[:dealer_card][i].split(' ')[0]%>.jpg"/>
+      <%end%>
+    <%end%>
+  <%end%>
+  <h5 class='total'><%=@turn != 'end' ? "Dealer's first card hidden." : "Total: #{calculate_total(session[:dealer_card])}"%></h5>
+  <!-- dealer's turn: display buttons to flip card or deal new card -->
+  <%if @turn == 'dealer'%>
+    <%if calculate_total(session[:dealer_card]) <= DEALER_HIT_MIN #if dealer has to hit%> 
+      <%# check for soft hand%>
+      <%if calculate_total(session[:dealer_card]) == DEALER_HIT_MIN and session[:dealer_card].select {|card| card[0] == 'A'} != []%>
+        <%break%>
+      <%else%>
+        <!-- dealer hit condition -->
+        <p>Dealer will hit.</p>
+        <form action='/dealer/hit'>
+          <input type='submit' value="Click to see dealer's new card." class='btn btn-primary'>
+        </form>
+      <%end%>
+    <%elsif calculate_total(session[:dealer_card]) >= BLACKJACK_AMT%>
+      <!-- check winner -->
+      <%redirect '/result'%>
+    <%else%>
+      <!-- dealer stay condition -->
+      <p>Dealer will stay.</p>
+        <form action='/result' method='get'>
+          <input type='submit' value="Click to flip dealer's card." class='btn btn-primary' id='flip'>
+        </form>
+    <%end%>
+  <%end%>
+</p>
+</div>
+
+
+<!-- player component -->
+<div class='well'>
+  <p><h5><%="Your cards:"%></h5>
+    <%session[:player_card].each do |card|%>
+      <%@player_deal_one = 'Y' if session[:player_card].last == card and @player_deal%>
+      <%session[:deck].each do |card|%>
+        <img src="/images/cards/<%=card.split(' ')[-1].downcase%>_<%=card.split(' ')[0].downcase%>.jpg" class='animated bounceInDown bounceOutDown' id='shuffle2'>
+      <%end if @deal || @player_deal_one%>
+      <%if ['A','J','Q','K'].include?card[0]%>
+        <img src="/images/cards/<%=card.split(' ')[-1].downcase%>_<%=card.split(' ')[0].downcase%>.jpg">
+      <%else%>
+        <img src="/images/cards/<%=card.split(' ')[-1].downcase%>_<%=card.split(' ')[0]%>.jpg">
+      <%end%>
+    <%end%>
+    <h5 class='total'><%="Total: #{calculate_total(session[:player_card])}"%></h5>
+  </p>
+</div>
+
+<!-- hit or stay -->
+<%if @turn == 'player'%>
+<div id='summary'>
+  <h5><%="Bet: $#{session[:bet]}"%></h5>
+  <h5><%="Balance: $#{session[:balance]}"%></h5>
+  
+    <h5>What would you like to do?</h5>
+    <form action='/player/hit' class='choice1'>
+      <input type='submit' class='btn btn-success' value='Hit'>
+    </form>
+    <form action='/player/stay' class='choice1'>
+      <input type='submit' class='btn btn-warning' value='Stay'>
+    </form>
+    <%if @deal%>
+      <form action='/new_game' class='choice2'>
+        <input type='submit' class='btn btn-info' value='Shuffle Again'>
+      </form>
+    <%end%>
+</div>
+<%end%>
+
+
