@@ -10,7 +10,7 @@
       <input type='submit' class='btn animated shake choice1'/>
     <%end%>
   </form>
-  <%unless session[:bet].nil?%>
+  <%unless session[:bet].nil? || session[:bet] == 0%>
     <form action='/new_game'>
         <input type='submit' class='btn btn-info choice2' value="Same bet: $<%=session[:bet]%>" id='same_bet'/> 
     </form>

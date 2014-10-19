@@ -63,14 +63,15 @@ end
 
 post '/' do
   session[:username] = params[:username]
-  session[:balance] = "500.00"
-  redirect '/bet' if session[:username] != ''
-  @error = 'Please enter a name.' if session[:username] == '' or session[:username].nil?
+  session[:balance] = "500.00" # initial pot of money
+  session[:bet] = 0
+  redirect '/bet' if session[:username] != '' # go to set bet if a username is entered
+  @error = 'Please enter a name.' if session[:username] == '' or session[:username].nil? # no name message
   erb :get_username
 end
 
 get '/bet' do
-  @error = "You ran out of money! Please start a new game." if session[:balance].to_f <= 0
+  @error = "You ran out of money! Please start a new game." if session[:balance].to_f <= 0 # low balance message
   redirect '/set_username' if !session[:username]
   erb :set_bet
 end
@@ -82,27 +83,28 @@ get '/set_username' do
 end
 
 post '/bet' do
-  redirect '/' if !session[:username]
   if params[:bet].include?('.')
-    session[:bet] = params[:bet].split('.')[0] + '.' + params[:bet].split('.')[1].ljust(2,'0')
+    params[:bet] = params[:bet].split('.')[0] + '.' + params[:bet].split('.')[1].ljust(2,'0')
   else
-    session[:bet] = params[:bet] + '.00'
+    params[:bet] = params[:bet] + '.00'
   end
-  if session[:bet].to_f > session[:balance].to_f
+  if params[:bet].to_f > session[:balance].to_f
     @error = "Woops! Looks like you don't have $#{params[:bet]} with you. "
-  elsif session[:bet].to_f == 0 || (params[:bet].to_f.to_s != params[:bet] && params[:bet].to_i.to_s != params[:bet])
+  elsif params[:bet].to_f == 0 || !params[:bet].include?(params[:bet].to_f.to_s)
     @error = "Please enter a number."
-  elsif session[:bet].to_f < 0 or session[:bet].to_f.zero?
+  elsif params[:bet].to_f < 0 or params[:bet].to_f.zero?
     @error = "Your bet has to be bigger than $0."
-  elsif (session[:bet].split('.')[1].length > 2 rescue false) 
+  elsif (params[:bet].split('.')[1].length > 2 rescue false) 
     @error = "Please enter a valid dollar amount."
-  elsif session[:bet].to_f <= session[:balance].to_f && session[:bet].to_f > 0
+  elsif params[:bet].to_f <= session[:balance].to_f && params[:bet].to_f > 0
+    session[:bet] = params[:bet]
     redirect '/new_game'
   end
   erb :set_bet
 end
 
 get '/new_game' do
+  redirect '/' if !session[:username]
   @deal = 'Y'
   # create a deck
   suit = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
