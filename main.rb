@@ -116,43 +116,44 @@ get '/new_game' do
   session[:player_card] = session[:deck].pop(2)
   session[:dealer_card] = session[:deck].pop(2)
   if calculate_total(session[:player_card]) >= 21
-    redirect '/result'
+    @turn = 'end'
+    end_game?
   else
    @success = "Welcome, #{session[:username]}!"
   end
   erb :game
 end
 
-get '/player/hit' do
+post '/player/hit' do
   @player_deal = 'Y'
   session[:player_card] << session[:deck].pop
   @info = "You chose to hit! Your new card is #{session[:player_card][-1]}."
   redirect '/result' if calculate_total(session[:player_card]) >= BLACKJACK_AMT
-  erb :game
+
+  erb :game, layout:false
 end
 
-get '/player/stay' do
-  @info = 'You chose to stay!'
+post '/player/stay' do
   @turn = 'dealer'
   redirect '/result' if calculate_total(session[:dealer_card]) >= BLACKJACK_AMT
-  erb :game
+  erb :game, layout: false
 end
 
-get '/dealer/hit' do
+post '/dealer/hit' do
   @dealer_deal = 'Y'
   @turn = 'dealer'
   @info = "Dealer hit at #{calculate_total(session[:dealer_card])}. A new card is dealt."
   session[:dealer_card] << session[:deck].pop
-  erb :game
+  erb :game, layout: false
 end
 
 get '/result' do
   @turn = 'end'
   end_game?
-  erb :game
+  erb :game, layout:false
 end
 
-get '/bye' do
+post '/bye' do
   erb :bye
 end
 

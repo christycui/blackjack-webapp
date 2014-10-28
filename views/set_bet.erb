@@ -2,7 +2,7 @@
   <h2><%="#{session[:username]}, it looks like you have $#{session[:balance]} in your pocket."%></h2>
   <h4>How much would you like to bet on this round?</h4>
   <form action='/bet' method='post'>
-    $   <input type='text' name='bet'/>
+    <input type='text' name='bet'/>
     <br>
     <%if !params[:bet]%>
       <input type='submit' class='btn choice1'/> 
@@ -10,7 +10,7 @@
       <input type='submit' class='btn animated shake choice1'/>
     <%end%>
   </form>
-  <%unless session[:bet].nil? || session[:bet] == 0%>
+  <%unless session[:bet].nil? || session[:bet] == 0 || session[:bet].to_f > session[:balance].to_f%>
     <form action='/new_game'>
         <input type='submit' class='btn btn-info choice2' value="Same bet: $<%=session[:bet]%>" id='same_bet'/> 
     </form>
