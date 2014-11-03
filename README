@@ -1,4 +1,12 @@
-1. Make sure the 'sinatra' gem is installed.
-2. From the command line, you can start the server by 'ruby main.rb'
-3. If you have the 'shotgun' gem installed, you can instead run 'shotgun main.rb'
-4. ctrl+c to stop the server
+Free free to give a play at my blackjack game here: little-cxx-blackjack.herokuapp.com
+
+This basic blackjack game features: 
+1. betting
+  1) starting balance of $500
+  2) checking invalid input when asked to enter a bet
+  3) player can't play once balance goes below 0
+2. checking soft hand
+  if dealer has a soft hand and her total is 17, she would hit again instead of stay
+3. shuffle-cards animation
+
+I also borrowed some CSS animations from Daniel Eden and you can see my acknowledgement in the bye page.
