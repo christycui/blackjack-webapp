@@ -77,7 +77,7 @@
         <%end%>
       <%elsif calculate_total(session[:dealer_card]) >= BLACKJACK_AMT%>
         <!-- check winner -->
-          redirect '/result'
+          <% redirect '/result' %>
       <%else%>
         <!-- dealer stay condition -->
         <p>Dealer will stay.</p>
